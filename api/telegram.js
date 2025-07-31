@@ -8,21 +8,33 @@ const notion = new Client({ auth: process.env.NOTION_TOKEN });
 async function sendTelegramMessage(chatId, text) {
   try {
     const telegramToken = process.env.TELEGRAM_TOKEN;
+    
+    // Debug logging
+    console.log('Telegram token exists:', !!telegramToken);
+    console.log('Telegram token length:', telegramToken ? telegramToken.length : 0);
+    console.log('Chat ID:', chatId, 'Type:', typeof chatId);
     console.log('Sending message to Telegram API...');
-    const response = await fetch(
-      `https://api.telegram.org/bot${telegramToken}/sendMessage`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text,
-          parse_mode: 'HTML',
-        }),
-      }
-    );
+    
+    const url = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
+    console.log('Request URL:', url.replace(telegramToken, 'TOKEN_HIDDEN'));
+    
+    const payload = {
+      chat_id: chatId,
+      text,
+      parse_mode: 'HTML',
+    };
+    console.log('Request payload:', payload);
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    
+    console.log('Response status:', response.status);
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
     
     const result = await response.json();
     console.log('Telegram API response:', result);
