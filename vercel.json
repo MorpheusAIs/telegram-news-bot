@@ -4,6 +4,23 @@
     { "src": "api/**/*.js", "use": "@vercel/node" }
   ],
   "routes": [
+    { 
+      "src": "/api/telegram", 
+      "dest": "/api/telegram.js",
+      "continue": true
+    },
     { "src": "/api/(.*)", "dest": "/api/$1" }
-  ]
+  ],
+  "headers": [
+    {
+      "source": "/api/telegram",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" }
+      ]
+    }
+  ],
+  "github": {
+    "silent": true
+  },
+  "public": true
 }
