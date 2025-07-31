@@ -3,13 +3,9 @@
   "builds": [
     { "src": "api/**/*.js", "use": "@vercel/node" }
   ],
-  "routes": [
-    { 
-      "src": "/api/telegram", 
-      "dest": "/api/telegram.js",
-      "continue": true
-    },
-    { "src": "/api/(.*)", "dest": "/api/$1" }
+  "rewrites": [
+    { "source": "/api/telegram", "destination": "/api/telegram.js" },
+    { "source": "/api/(.*)", "destination": "/api/$1" }
   ],
   "headers": [
     {
