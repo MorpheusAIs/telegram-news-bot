@@ -8,6 +8,7 @@ const notion = new Client({ auth: process.env.NOTION_TOKEN });
 async function sendTelegramMessage(chatId, text) {
   try {
     const telegramToken = process.env.TELEGRAM_TOKEN;
+    console.log('Sending message to Telegram API...');
     const response = await fetch(
       `https://api.telegram.org/bot${telegramToken}/sendMessage`,
       {
@@ -22,10 +23,19 @@ async function sendTelegramMessage(chatId, text) {
         }),
       }
     );
-    return await response.json();
+    
+    const result = await response.json();
+    console.log('Telegram API response:', result);
+    
+    if (!response.ok) {
+      console.error('Telegram API error:', result);
+      return { ok: false, error: result };
+    }
+    
+    return result;
   } catch (error) {
     console.error('Error sending Telegram message:', error);
-    return null;
+    return { ok: false, error: error.message };
   }
 }
 
@@ -47,6 +57,28 @@ export default async function handler(req, res) {
     if (!url || !url.startsWith('http')) {
       console.log('Ignoring non-link message');
       return res.status(200).json({ ok: true }); // Ignore non-links
+    }
+
+    // Check if URL already exists in the database
+    console.log('Checking if URL already exists in database:', process.env.NOTION_DATABASE_ID);
+    const existingPages = await notion.databases.query({
+      database_id: process.env.NOTION_DATABASE_ID,
+      filter: {
+        property: 'url',
+        url: {
+          equals: url
+        }
+      }
+    });
+
+    if (existingPages.results.length > 0) {
+      console.log('URL already exists in database');
+      if (chatId) {
+        const duplicateMessage = `⚠️ This URL already exists in Notion.`;
+        const result = await sendTelegramMessage(chatId, duplicateMessage);
+        console.log('Duplicate message sent to chat:', chatId, 'Result:', result);
+      }
+      return res.status(200).json({ ok: true, message: 'URL already exists' });
     }
 
     console.log('Fetching metadata for URL:', url);
@@ -77,8 +109,8 @@ export default async function handler(req, res) {
     // Send confirmation message back to the chat
     if (chatId) {
       const confirmationMessage = `✅ <b>${metadata.title || 'Link'}</b> has been saved to Notion.`;
-      await sendTelegramMessage(chatId, confirmationMessage);
-      console.log('Confirmation message sent to chat:', chatId);
+      const result = await sendTelegramMessage(chatId, confirmationMessage);
+      console.log('Confirmation message sent to chat:', chatId, 'Result:', result);
     }
 
     return res.status(200).json({ ok: true });
