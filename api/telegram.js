@@ -1,6 +1,6 @@
 import { Client } from '@notionhq/client';
 import fetch from 'node-fetch';
-import { parseMetadata } from '../utils/fetchMetadata';
+import { parseMetadata } from '../utils/fetchMetadata.js';
 
 const notion = new Client({ auth: process.env.NOTION_TOKEN });
 
