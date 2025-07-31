@@ -19,7 +19,6 @@ A serverless Telegram bot that saves links shared in a Telegram chat to a Notion
    ```
    curl "https://api.telegram.org/bot<YOUR_BOT_TOKEN>/setWebhook?url=https://your-app.vercel.app/api/telegram"
    ```
-7. Profit
 
 ## Environment Variables
 
